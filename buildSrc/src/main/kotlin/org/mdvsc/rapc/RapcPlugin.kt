@@ -10,6 +10,7 @@ import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.gradle.dsl.JvmDefaultMode
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -210,13 +211,15 @@ class RapcPlugin: Plugin<Project> {
     private fun Project.configureJavaCompatibility() = afterEvaluate {
         if (plugins.hasPlugin("java") || plugins.hasPlugin("java-library")) {
             val maxVersion = JavaVersion.VERSION_11
+            val maxVersionCode = 11
             val javaExtension = extensions.getByType(JavaPluginExtension::class.java)
             if (javaExtension.sourceCompatibility > maxVersion) {
-                javaExtension.targetCompatibility = maxVersion
+                javaExtension.sourceCompatibility = maxVersion
                 logger.warn("[${this.javaClass.simpleName}] Warning: Java source change to $maxVersion")
             }
             if (javaExtension.targetCompatibility > maxVersion) {
                 javaExtension.targetCompatibility = maxVersion
+                extensions.getByType(JavaCompile::class.java).options.release.set(maxVersionCode)
                 logger.warn("[${this.javaClass.simpleName}] Warning: Java target change to $maxVersion")
             }
         }
